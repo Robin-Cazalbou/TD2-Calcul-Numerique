@@ -153,6 +153,23 @@ void write_xy(double* vec, double* x, int* la, char* filename){
   }
 }
 
+//=========================================================================
+// Factorisation LU avec stockage en priorité ligne :
+void mylu_tridiag_rowmajor(double* AB, int n){
+  AB[2*n]=AB[2*n]/AB[n]; //calcul de m_1 (à part car n'a pas de m_i*c_i au dénominateur)
+  for (int i=1; i<n-1; i++){ //calcul des m_i sauf m_1
+    AB[2*n+i]=AB[2*n+i]/(AB[n+i]-AB[2*n+i-1]*AB[i]);
+  }
+  for (int i=1; i<n; i++){ //calcul des d_i (diagonale de U)
+    AB[n+i]= AB[n+i]-AB[2*n+i-1]*AB[n+i-1];
+  }
+}
+
+// Factorisation LU avec stockage en priorité colonne :
+
+
+//=========================================================================
+
 void eig_poisson1D(double* eigval, int *la){
   int ii;
   double scal;

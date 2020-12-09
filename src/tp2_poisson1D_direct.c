@@ -144,6 +144,34 @@ int main(int argc,char *argv[])
 
   //============================================================================
 
+  //------------ Exercice 5 ------------------------
+  //============================================================================
+  double* DB;
+  lab=3;
+  DB = (double *) malloc(sizeof(double)*3*la);
+  DB[0]=0.0;
+  for (int i=1; i<la; i++){
+    DB[i]=-1.0;
+  }
+  for (int i=0; i<la; i++){
+    DB[i+la]=2.0;
+  }
+  for (int i=0; i<la-1; i++){
+    DB[i+2*la]=-1.0;
+  }
+  DB[3*la-1]=0.0;
+
+  // Factorisation LU
+  mylu_tridiag_rowmajor(DB, la);
+  write_GB_operator_rowMajor_poisson1D(DB, &lab, &la, "my_lu.dat");
+
+  // Test de la factorisation
+
+  
+
+
+  //============================================================================
+
 
 
 
@@ -152,6 +180,7 @@ int main(int argc,char *argv[])
   free(X); //libération troisième malloc
   free(AB);
   free(CB);
+  free(DB);
   free(ipiv);
 
   printf("\n\n--------- End -----------\n");

@@ -161,12 +161,24 @@ void mylu_tridiag_rowmajor(double* AB, int n){
     AB[2*n+i]=AB[2*n+i]/(AB[n+i]-AB[2*n+i-1]*AB[i]);
   }
   for (int i=1; i<n; i++){ //calcul des d_i (diagonale de U)
-    AB[n+i]= AB[n+i]-AB[2*n+i-1]*AB[n+i-1];
+    AB[n+i]= AB[n+i]-AB[2*n+i-1]*AB[i];
   }
 }
 
-// Factorisation LU avec stockage en priorité colonne :
-
+// Résolution d'un système linéaire Ax=b, avec A sous forme LU compact (A tridiagonale)
+// /!\ le second membre b est modifié à la fin de l'appel, et contient la solution
+// du système Ax=b
+void myresol_LU_tridiag_rowmajor(double* AB, int n, double* b){
+  //Descente avec L : stockage du résultat de Ly=b dans b
+  for (int i=1; i<n; i++){
+    b[i]=b[i]-AB[2*n-1 + i]*b[i-1];
+  }
+  //Remontée avec U : stockage du résultat de Ux=y (ou Ux=b avec le stockage précédent dans b) dans b
+  b[n-1]=b[n-1]/AB[2*n-1];
+  for (int i=n-2; i>-1; i--){
+    b[i]=(b[i]-AB[i+1]*b[i+1])/AB[n+i];
+  }
+}
 
 //=========================================================================
 

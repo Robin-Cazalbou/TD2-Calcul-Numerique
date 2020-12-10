@@ -151,11 +151,14 @@ int main(int argc,char *argv[])
 
   //============================================================================
 
+
+
   //------------ Exercice 5 ------------------------
   //============================================================================
+  // Matrice du système (matrice de Poisson)
   double* EB;
   lab=3;
-  EB = (double *) malloc(sizeof(double)*3*la);
+  EB = (double *) malloc(sizeof(double)*lab*la);
   EB[0]=0.0;
   for (int i=1; i<la; i++){
     EB[i]=-1.0;
@@ -166,15 +169,27 @@ int main(int argc,char *argv[])
   for (int i=0; i<la-1; i++){
     EB[i+2*la]=-1.0;
   }
-  EB[3*la-1]=0.0;
+  EB[lab*la-1]=0.0;
+
+  // Second membre du système (conditions aux bords T0 et T1, le reste = 0)
+  double* b;
+  b = (double *) malloc(sizeof(double)*la);
+  set_dense_RHS_DBC_1D(b,&la,&T0,&T1);
 
   // Factorisation LU
   mylu_tridiag_rowmajor(EB, la);
-  write_GB_operator_rowMajor_poisson1D(EB, &lab, &la, "my_lu.dat");
+  myresol_LU_tridiag_rowmajor(EB, la, b);
+  write_vec(b, &la, "exo5_b.dat");
 
-  // Test de la factorisation
+  // Validation de la méthode : calcul de l'erreur relative
+  temp = cblas_ddot(la, EX_SOL, 1, EX_SOL, 1);
+  temp = sqrt(temp);
+  cblas_daxpy(la, -1.0, EX_SOL, 1, b, 1);
+  relres = cblas_ddot(la, b, 1, b, 1);
+  relres = sqrt(relres);
+  relres = relres / temp;
 
-
+  printf("\nExercice 5 :\nL'erreur relative résiduelle sur la solution avec mylu est = %e\n",relres);
 
 
   //============================================================================
@@ -185,10 +200,13 @@ int main(int argc,char *argv[])
   free(RHS); //libération premier malloc
   free(EX_SOL); //libération deuxième malloc
   free(X); //libération troisième malloc
+  free(RHS_2);
+  free(RHS_3);
   free(AB);
   free(CB);
   free(DB);
   free(EB);
+  free(b);
   free(ipiv);
 
   printf("\n\n--------- End -----------\n");

@@ -60,7 +60,6 @@ int main(int argc,char *argv[])
     write_GB_operator_rowMajor_poisson1D(AB, &lab, &la, "AB_row.dat");
 
     info = LAPACKE_dgbsv(LAPACK_ROW_MAJOR,la, kl, ku, NRHS, AB, la, ipiv, RHS, NRHS);
-    write_GB_operator_rowMajor_poisson1D(AB, &lab, &la, "AB_row_postdgbsv.dat");
   }
   else { // LAPACK_COL_MAJOR
     set_GB_operator_colMajor_poisson1D(AB, &lab, &la, &kv);
@@ -92,22 +91,20 @@ int main(int argc,char *argv[])
   // Test de dgbmv :
     double *CB;
     CB = (double *) malloc(sizeof(double)*(lab-1)*la);
-    for (int i=1; i<la-1; i++){
+    for (int i=0; i<la; i++){
       CB[i*(lab-1)]=-1.0;
       CB[i*(lab-1) + 1]=2.0;
       CB[i*(lab-1) + 2]=-1.0;
     }
-    CB[1]=2.0;
-    CB[2]=-1.0;
-    CB[(lab-1)*la - 3] = -1.0;
-    CB[(lab-1)*la - 2] = 2.0;
+    CB[0]=0.0;
+    CB[(lab-1)*la - 1] = 0.0;
 
     double *RHS_2;
     RHS_2=(double *) malloc(sizeof(double)*la);
     set_dense_RHS_DBC_1D(RHS,&la,&T0,&T1);
     set_analytical_solution_DBC_1D(EX_SOL, X, &la, &T0, &T1);
 
-    //dgbmv en row major :
+    //dgbmv en col major :
     cblas_dgbmv(CblasColMajor, CblasNoTrans, la, la, kl, ku, 1.0, CB, lab-1, EX_SOL, 1, 0, RHS_2, 1);
 
     // Erreur relative résiduelle
@@ -123,13 +120,23 @@ int main(int argc,char *argv[])
   //============================================================================
   //============================================================================
   // Test de dgbmv :
+    double *DB;
+    DB=(double *) malloc(sizeof(double)*(lab-1)*la);
+    for (int i=0; i<la; i++){
+      DB[i]=-1.0;
+      DB[i + la]=2.0;
+      DB[i + 2*la]=-1.0;
+    }
+    DB[0]=0.0;
+    DB[(lab-1)*la -1]=0.0;
+
     double *RHS_3;
     RHS_3=(double *) malloc(sizeof(double)*la);
     set_dense_RHS_DBC_1D(RHS,&la,&T0,&T1);
     set_analytical_solution_DBC_1D(EX_SOL, X, &la, &T0, &T1);
 
     //dgbmv en row major :
-    cblas_dgbmv(CblasRowMajor, CblasNoTrans, la, la, kl, ku, 1.0, CB, lab-1, EX_SOL, 1, 0, RHS_3, 1);
+    cblas_dgbmv(CblasRowMajor, CblasNoTrans, la, la, kl, ku, 1.0, DB, la, EX_SOL, 1, 0.0, RHS_3, 1);
     write_vec(RHS_3, &la, "my_dgbmv.dat");
 
     // Erreur relative résiduelle
@@ -146,28 +153,28 @@ int main(int argc,char *argv[])
 
   //------------ Exercice 5 ------------------------
   //============================================================================
-  double* DB;
+  double* EB;
   lab=3;
-  DB = (double *) malloc(sizeof(double)*3*la);
-  DB[0]=0.0;
+  EB = (double *) malloc(sizeof(double)*3*la);
+  EB[0]=0.0;
   for (int i=1; i<la; i++){
-    DB[i]=-1.0;
+    EB[i]=-1.0;
   }
   for (int i=0; i<la; i++){
-    DB[i+la]=2.0;
+    EB[i+la]=2.0;
   }
   for (int i=0; i<la-1; i++){
-    DB[i+2*la]=-1.0;
+    EB[i+2*la]=-1.0;
   }
-  DB[3*la-1]=0.0;
+  EB[3*la-1]=0.0;
 
   // Factorisation LU
-  mylu_tridiag_rowmajor(DB, la);
-  write_GB_operator_rowMajor_poisson1D(DB, &lab, &la, "my_lu.dat");
+  mylu_tridiag_rowmajor(EB, la);
+  write_GB_operator_rowMajor_poisson1D(EB, &lab, &la, "my_lu.dat");
 
   // Test de la factorisation
 
-  
+
 
 
   //============================================================================
@@ -181,6 +188,7 @@ int main(int argc,char *argv[])
   free(AB);
   free(CB);
   free(DB);
+  free(EB);
   free(ipiv);
 
   printf("\n\n--------- End -----------\n");

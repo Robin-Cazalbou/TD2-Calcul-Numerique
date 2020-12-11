@@ -132,12 +132,17 @@ int main(int argc,char *argv[])
 
     double *RHS_3;
     RHS_3=(double *) malloc(sizeof(double)*la);
+    for (int i=0; i<la; i++){
+      RHS_3[i]=0.0;
+    }
+    RHS_3[50]=1.0;
+
     set_dense_RHS_DBC_1D(RHS,&la,&T0,&T1);
-    set_analytical_solution_DBC_1D(EX_SOL, X, &la, &T0, &T1);
+    //set_analytical_solution_DBC_1D(EX_SOL, X, &la, &T0, &T1);
 
     //dgbmv en row major :
-    cblas_dgbmv(CblasRowMajor, CblasNoTrans, la, la, kl, ku, 1.0, DB, la, EX_SOL, 1, 0.0, RHS_3, 1);
-    write_vec(RHS_3, &la, "my_dgbmv.dat");
+    cblas_dgbmv(CblasRowMajor, CblasNoTrans, la, la, kl, ku, 1.0, DB, la, /*EX_SOL*/ RHS_3, 1, 0.0, RHS_3, 1);
+    write_vec(RHS_3, &la, "my_dgbmv.dat"); //mauvaise valeur : on s'attent à la première colonne de A
 
     // Erreur relative résiduelle
     temp = cblas_ddot(la, RHS, 1, RHS,1);

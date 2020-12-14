@@ -11,7 +11,7 @@ function [r] = GaussSiedel(A, b, k)
         r = b-A*res; //mise à jour du résidu
     end
     
-    r = norm(r);
+    r = norm(r)/norm(b);
     
 endfunction
 

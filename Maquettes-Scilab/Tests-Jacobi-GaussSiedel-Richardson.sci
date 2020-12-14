@@ -13,9 +13,14 @@ end
 b(n,1) = T1;
 
 
+
+
+alpha = 1/(1+cos(%pi/(n+1)));
+
 for k=1:150
     errJ(k) = Jacobi(A, b, k);
     errGS(k) = GaussSiedel(A, b, k);
+    errR(k) = Richardson(alpha, A, b, k);
 end
 
-plot([1:150], [log10(errJ) log10(errGS)]) //bleu : Jacobi, vert : Gauss-Siedel
+plot([1:150], [log10(errJ) log10(errGS) log10(errR)]) //bleu : Jacobi, vert : Gauss-Siedel, rouge : Richardson
